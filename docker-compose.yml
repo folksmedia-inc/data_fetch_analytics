@@ -1,0 +1,17 @@
+# docker-compose.yml
+
+version: '3.7'
+
+services:
+  theta_data:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: uvicorn main:app --workers 2 --host 0.0.0.0
+    volumes:
+      - .:/app
+    ports:
+      - 8099:8000
+    env_file:
+      - ./.env
