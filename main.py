@@ -19,7 +19,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Accessing Analytics Backend Server"}
 
 
 @app.get("/fetch_data")
