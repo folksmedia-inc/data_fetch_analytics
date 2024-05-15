@@ -34,6 +34,10 @@ async def fetch_data(
     - ivl: int (optional, default=900000), e.g., 900000
     """
     connection, cur = conn
+    exp_y = exp[:4]
+    exp_m = exp[4:6]
+    exp_d = exp[6:]
+    expiration_date_formatted = f"{exp_y}-{exp_m}-{exp_d}"
     url = f"http://3.85.111.217:25510/v2/bulk_hist/option/open_interest?root={root}&exp={exp}&start_date={start_date}&end_date={end_date}&use_csv=true"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -58,17 +62,13 @@ async def fetch_data(
 
                         with connection.cursor() as cur:
 
-                            fetch_sql = f"""SELECT DISTINCT(date) AS date from open_interest WHERE ticker='{root}' AND expiration_date='{exp}'"""
+                            fetch_sql = f"""SELECT DISTINCT(date) AS date from open_interest WHERE ticker='{root}' AND expiration_date='{expiration_date_formatted}'"""
                             cur.execute(fetch_sql)
                             existing_dates = cur.fetchall()
                             existing_dates = [i["date"] for i in existing_dates] if existing_dates else []
 
                             for row in csv_rows:
                                 ticker, expiration, strike, call_put, ms_of_day, open_interest, date = row
-                                exp_y = expiration[:4]
-                                exp_m = expiration[4:6]
-                                exp_d = expiration[6:]
-                                expiration_date_formatted = f"{exp_y}-{exp_m}-{exp_d}"
 
                                 date_y =date[:4]
                                 date_m = date[4:6]
