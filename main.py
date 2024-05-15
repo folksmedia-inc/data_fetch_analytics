@@ -70,6 +70,8 @@ async def fetch_data(
                             for row in csv_rows:
                                 ticker, expiration, strike, call_put, ms_of_day, open_interest, date = row
 
+                                call_put = 'Call' if 'C' else 'Put'
+
                                 strike_updated = int(strike)/1000
 
                                 date_y =date[:4]
