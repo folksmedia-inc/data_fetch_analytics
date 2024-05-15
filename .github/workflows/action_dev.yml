@@ -16,7 +16,7 @@ jobs:
       - name: Pulling from git
         run: |
           cd /home/ubuntu/data_fetch_analytics
-          git pull origin dev --ff
+          git pull origin main --ff
 
       - name: Build image
         run: |
