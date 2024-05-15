@@ -4,7 +4,6 @@ import aiohttp
 from starlette.responses import Response
 from fastapi import Depends
 from config import tracker
-from helper import create_or_update_table
 import pymysql
 from fastapi.responses import JSONResponse
 
@@ -38,9 +37,9 @@ async def fetch_data(
     url = f"http://3.85.111.217:25510/v2/bulk_hist/option/open_interest?root={root}&exp={exp}&start_date={start_date}&end_date={end_date}&use_csv=true"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            table_name = f'{root}_{exp}'
+            table_name = 'open_interest'
             if response.status == 200:
-                create_or_update_table(table_name, conn)
+                # create_or_update_table(table_name, conn)
                 if response.content_type == "application/json":
                     data = await response.json()
                     return JSONResponse(content=data, status_code=200)
@@ -58,15 +57,32 @@ async def fetch_data(
                         connection.ping(reconnect=True)  # Ensure the connection is alive
 
                         with connection.cursor() as cur:
-                            sql = f"""DELETE from {table_name}"""
-                            cur.execute(sql)
-                            connection.commit()
+
+                            fetch_sql = f"""SELECT DISTINCT(date) AS date from open_interest WHERE ticker='{root}' AND expiration_date='{exp}'"""
+                            cur.execute(fetch_sql)
+                            existing_dates = cur.fetchall()
+                            existing_dates = [i["date"] for i in existing_dates] if existing_dates else []
+
                             for row in csv_rows:
                                 ticker, expiration, strike, call_put, ms_of_day, open_interest, date = row
+                                exp_y = expiration[:4]
+                                exp_m = expiration[4:6]
+                                exp_d = expiration[6:]
+                                expiration_date_formatted = f"{exp_y}-{exp_m}-{exp_d}"
+
+                                date_y =date[:4]
+                                date_m = date[4:6]
+                                date_d = date[6:]
+                                date_formatted = f"{date_y}-{date_m}-{date_d}"
+
+                                if date_formatted in existing_dates:
+                                    print(f'Not entering for {date_formatted} since it already exists')
+                                    continue
+
                                 sql = f"""INSERT INTO {table_name} 
                                             (ticker, expiration_date, strike, call_put, ms_of_day, open_interest, date) 
                                             VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-                                values = (ticker, expiration, strike, call_put, ms_of_day, int(open_interest), date)
+                                values = (ticker, expiration_date_formatted, strike, call_put, ms_of_day, int(open_interest), date_formatted)
 
                                 try:
                                     cur.execute(sql, values)
