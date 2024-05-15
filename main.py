@@ -44,7 +44,7 @@ async def fetch_data(
     """
     connection, cur = conn
     if right in ['P', 'C']:
-        url = f"http://0.0.0.0:25510/v2/bulk_hist/option/open_interest?root={root}&exp={exp}&start_date={start_date}&end_date={end_date}&use_csv=true"
+        url = f"http://3.85.111.217:25510/v2/bulk_hist/option/open_interest?root={root}&exp={exp}&start_date={start_date}&end_date={end_date}&use_csv=true"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 table_name = f'{root}_{exp}'
