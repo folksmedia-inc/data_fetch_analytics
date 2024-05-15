@@ -70,7 +70,7 @@ async def fetch_data(
                             for row in csv_rows:
                                 ticker, expiration, strike, call_put, ms_of_day, open_interest, date = row
 
-                                strike_updated = strike/1000
+                                strike_updated = int(strike)/1000
 
                                 date_y =date[:4]
                                 date_m = date[4:6]
