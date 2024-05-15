@@ -73,6 +73,9 @@ async def fetch_data(
                             connection.ping(reconnect=True)  # Ensure the connection is alive
 
                             with connection.cursor() as cur:
+                                sql = f"""DELETE from {table_name}"""
+                                cur.execute(sql)
+                                connection.commit()
                                 for row in csv_rows:
                                     print(row)
                                     ticker, expiration, strike, call_put, ms_of_day, open_interest, date = row
