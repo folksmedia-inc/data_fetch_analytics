@@ -70,6 +70,8 @@ async def fetch_data(
                             for row in csv_rows:
                                 ticker, expiration, strike, call_put, ms_of_day, open_interest, date = row
 
+                                strike_updated = strike/1000
+
                                 date_y =date[:4]
                                 date_m = date[4:6]
                                 date_d = date[6:]
@@ -82,7 +84,7 @@ async def fetch_data(
                                 sql = f"""INSERT INTO {table_name} 
                                             (ticker, expiration_date, strike, call_put, ms_of_day, open_interest, date) 
                                             VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-                                values = (ticker, expiration_date_formatted, strike, call_put, ms_of_day, int(open_interest), date_formatted)
+                                values = (ticker, expiration_date_formatted, strike_updated, call_put, ms_of_day, int(open_interest), date_formatted)
 
                                 try:
                                     cur.execute(sql, values)
