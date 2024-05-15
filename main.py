@@ -6,6 +6,7 @@ from fastapi import Depends
 from config import tracker
 import pymysql
 from fastapi.responses import JSONResponse
+from metabase_sync import Metabase
 
 app = FastAPI()
 
@@ -33,6 +34,7 @@ async def fetch_data(
     - right: str (required), e.g., "P" or "C"
     - ivl: int (optional, default=900000), e.g., 900000
     """
+    metabase = Metabase()
     connection, cur = conn
     exp_y = exp[:4]
     exp_m = exp[4:6]
@@ -94,6 +96,7 @@ async def fetch_data(
                                     raise HTTPException(detail=f"Error: {e}", status_code=400)
 
                             connection.commit()
+                            metabase.sync_schema()
                         return JSONResponse(content='Success', status_code=200)
                     except Exception as err:
                         import traceback
